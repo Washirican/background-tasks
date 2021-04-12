@@ -1,9 +1,9 @@
-from rq import Queue
-from worker import conn
-from utils import count_words_at_url
+from flask import Flask
+from celery import Celery
 
-q = Queue(connection=conn)
+app = Flask(__name__)
+app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
+app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379/0'
 
-
-result = q.enqueue(count_words_at_url, 'http://heroku.com')
-print(result)
+celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
+celery.conf.update(app.config)
